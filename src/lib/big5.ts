@@ -106,24 +106,28 @@ export function buildManagementCards(result: Big5Result): Array<{
   if (bands.E === "low") comm.push("用异步沟通更有效：先写清目标与背景，给对方思考时间")
   if (bands.O === "high") comm.push("沟通可以给“为什么/愿景/可能性”，再落到下一步")
   if (bands.O === "low") comm.push("沟通优先给“事实/例子/边界/步骤”，少抽象表述")
+  if (comm.length === 0) comm.push("沟通方式较灵活，可根据任务紧急程度自由在同步（当面）与异步（文字）间切换。")
 
   const incentive: string[] = []
   if (bands.C === "high") incentive.push("给明确责任与交付标准，认可其可靠性与连续产出")
   if (bands.C === "low") incentive.push("把目标拆小并缩短反馈周期，用阶段性里程碑驱动")
   if (bands.N === "low") incentive.push("可以给更高压、更开放的不确定任务，但要明确优先级")
   if (bands.N === "high") incentive.push("在高压期要更早给预期与保护机制，减少突然变更")
+  if (incentive.length === 0) incentive.push("内在自律与外在驱动较均衡，保持常规的绩效沟通与定期复盘即可。")
 
   const taskFit: string[] = []
   if (bands.O === "high") taskFit.push("适合探索型：方案设计、产品定义、流程优化、0-1试验")
   if (bands.O === "low") taskFit.push("适合执行型：标准交付、质量把控、重复流程优化（微改良）")
   if (bands.C === "high") taskFit.push("适合 owner 角色：推进、排期、风险管理、闭环")
   if (bands.C === "low") taskFit.push("适合灵活支持：并行支援、突发处理，但需要外部节奏约束")
+  if (taskFit.length === 0) taskFit.push("具备较好的适应性，既能胜任标准流程交付，也能参与一定程度的探索性工作。")
 
   const risks: string[] = []
   if (bands.A === "high") risks.push("容易为了和谐而忍耐，建议明确“可说不”的边界与升级机制")
   if (bands.A === "low") risks.push("容易直球造成冲突，建议约定反馈格式：事实-影响-建议")
   if (bands.N === "high") risks.push("压力下更敏感，建议在风险出现的第一时间同步，不要独扛")
   if (bands.N === "low") risks.push("压力下可能低估风险，建议把关键风险显式写进看板并每周检查")
+  if (risks.length === 0) risks.push("情绪与协作倾向处于均衡区间，建议保持常规的团队心理建设与风险同步。")
 
   return [
     { title: "沟通方式", items: uniq(comm).slice(0, 4) },

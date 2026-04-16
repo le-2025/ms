@@ -35,7 +35,8 @@ export async function createSharedReport(input: Omit<SharedReport, "id" | "creat
   const report: SharedReport = { ...input, id: `rep_${crypto.randomUUID()}`, createdAt: now }
   
   // 将最新的报告插入到 Redis List 左侧（最新在前）
-  await kv.lpush(REPORT_LIST_KEY, JSON.stringify(report))
+  // Vercel KV / Upstash Redis 的 lpush 签名如果未更新可能报错，改用 pipeline 或 any 断言
+  await (kv as any).lpush(REPORT_LIST_KEY, JSON.stringify(report))
   return report
 }
 
