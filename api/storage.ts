@@ -1,5 +1,6 @@
 import { kv } from "@vercel/kv"
 import crypto from "node:crypto"
+import { createClient } from "redis"
 
 export type Big5Domain = "O" | "C" | "E" | "A" | "N"
 
@@ -30,24 +31,53 @@ type AdminSession = {
 const REPORT_LIST_KEY = "workstyle:reports:list"
 const SESSION_KEY_PREFIX = "workstyle:session:"
 
+type StorageMode = "kv" | "redis"
+
+function getStorageMode(): StorageMode {
+  if (process.env.REDIS_URL) return "redis"
+  return "kv"
+}
+
+type RedisClient = ReturnType<typeof createClient>
+
+let redisClientPromise: Promise<RedisClient> | undefined
+
+async function getRedisClient(): Promise<RedisClient> {
+  if (redisClientPromise) return redisClientPromise
+  const url = process.env.REDIS_URL
+  if (!url) throw new Error("REDIS_URL 未配置")
+  const client = createClient({ url }) as RedisClient
+  redisClientPromise = client.connect().then(() => client)
+  return redisClientPromise
+}
+
 export async function createSharedReport(input: Omit<SharedReport, "id" | "createdAt">): Promise<SharedReport> {
   const now = new Date().toISOString()
   const report: SharedReport = { ...input, id: `rep_${crypto.randomUUID()}`, createdAt: now }
-  
-  // 将最新的报告插入到 Redis List 左侧（最新在前）
-  // Vercel KV / Upstash Redis 的 lpush 签名如果未更新可能报错，改用 pipeline 或 any 断言
+
+  if (getStorageMode() === "redis") {
+    const client = await getRedisClient()
+    await client.lPush(REPORT_LIST_KEY, JSON.stringify(report))
+    return report
+  }
+
   await (kv as any).lpush(REPORT_LIST_KEY, JSON.stringify(report))
   return report
 }
 
 export async function listSharedReports(): Promise<SharedReport[]> {
-  // 获取整个列表 (0 到 -1 表示所有)
-  const rawList = await kv.lrange(REPORT_LIST_KEY, 0, -1)
+  if (getStorageMode() === "redis") {
+    const client = await getRedisClient()
+    const rawList = await client.lRange(REPORT_LIST_KEY, 0, -1)
+    return rawList.map((s) => {
+      const text = typeof s === "string" ? s : s.toString()
+      return JSON.parse(text) as SharedReport
+    })
+  }
+
+  const rawList = await (kv as any).lrange(REPORT_LIST_KEY, 0, -1)
   if (!rawList) return []
-  
-  // kv.lrange 返回的数据如果已经是对象（@vercel/kv 会自动解析 JSON），则直接断言
-  // 如果是字符串数组，则解析
-  return rawList.map((item: unknown) => {
+  return (rawList as unknown[]).map((item) => {
     if (typeof item === "string") return JSON.parse(item) as SharedReport
     return item as SharedReport
   })
@@ -71,22 +101,36 @@ export async function createAdminSession(token: string, ttlMs: number): Promise<
   
   const key = `${SESSION_KEY_PREFIX}${hash}`
   const ttlSeconds = Math.floor(ttlMs / 1000)
-  
-  // 将 session 存入 KV 并设置过期时间
+
+  if (getStorageMode() === "redis") {
+    const client = await getRedisClient()
+    await client.set(key, JSON.stringify(session), { EX: ttlSeconds })
+    return session
+  }
+
   await kv.set(key, JSON.stringify(session), { ex: ttlSeconds })
-  
   return session
 }
 
 export async function deleteAdminSession(token: string): Promise<void> {
   const hash = sha256(token)
   const key = `${SESSION_KEY_PREFIX}${hash}`
+  if (getStorageMode() === "redis") {
+    const client = await getRedisClient()
+    await client.del(key)
+    return
+  }
   await kv.del(key)
 }
 
 export async function verifyAdminToken(token: string): Promise<boolean> {
   const hash = sha256(token)
   const key = `${SESSION_KEY_PREFIX}${hash}`
+  if (getStorageMode() === "redis") {
+    const client = await getRedisClient()
+    const sessionData = await client.get(key)
+    return !!sessionData
+  }
   const sessionData = await kv.get(key)
   return !!sessionData
 }
@@ -94,4 +138,3 @@ export async function verifyAdminToken(token: string): Promise<boolean> {
 function sha256(v: string): string {
   return crypto.createHash("sha256").update(v).digest("hex")
 }
-

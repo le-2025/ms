@@ -4,7 +4,7 @@ import { createAdminSession, deleteAdminSession, getSharedReport, listSharedRepo
 
 const router = Router()
 
-router.post("/login", async (req: Request, res: Response) => {
+router.post("/admin/login", async (req: Request, res: Response) => {
   const body = req.body as Partial<{ password: string }>
   const expected = process.env.ADMIN_PASSWORD || (process.env.NODE_ENV !== "production" ? "admin" : "")
   if (!expected) {
@@ -21,18 +21,18 @@ router.post("/login", async (req: Request, res: Response) => {
   res.status(200).json({ token })
 })
 
-router.post("/logout", adminGuard, async (req: Request, res: Response) => {
+router.post("/admin/logout", adminGuard, async (req: Request, res: Response) => {
   const token = getBearerToken(req)
   if (token) await deleteAdminSession(token)
   res.status(200).json({ success: true })
 })
 
-router.get("/reports", adminGuard, async (_req: Request, res: Response) => {
+router.get("/admin/reports", adminGuard, async (_req: Request, res: Response) => {
   const reports = await listSharedReports()
   res.status(200).json({ reports })
 })
 
-router.get("/reports/:id", adminGuard, async (req: Request, res: Response) => {
+router.get("/admin/reports/:id", adminGuard, async (req: Request, res: Response) => {
   const report = await getSharedReport(req.params.id)
   if (!report) {
     res.status(404).json({ success: false, error: "未找到" })
@@ -62,4 +62,3 @@ function getBearerToken(req: Request): string | null {
 }
 
 export default router
-
