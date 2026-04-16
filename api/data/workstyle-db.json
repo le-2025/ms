@@ -1,0 +1,64 @@
+{
+  "reports": [
+    {
+      "assessmentKind": "big5",
+      "assessmentVersion": "short",
+      "scores": {
+        "O": 75,
+        "C": 73,
+        "E": 38,
+        "A": 57,
+        "N": 68
+      },
+      "bands": {
+        "O": "high",
+        "C": "high",
+        "E": "mid",
+        "A": "mid",
+        "N": "high"
+      },
+      "id": "rep_1796547c-2bc2-4e7f-a48b-87a723f79180",
+      "createdAt": "2026-04-16T07:04:20.916Z"
+    },
+    {
+      "assessmentKind": "big5",
+      "assessmentVersion": "short",
+      "scores": {
+        "O": 75,
+        "C": 73,
+        "E": 38,
+        "A": 57,
+        "N": 68
+      },
+      "bands": {
+        "O": "high",
+        "C": "high",
+        "E": "mid",
+        "A": "mid",
+        "N": "high"
+      },
+      "id": "rep_66ac9fad-0ac5-46e4-9a4c-0cbd9641ed55",
+      "createdAt": "2026-04-16T07:05:21.336Z"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "ses_280f0df4-fae1-444a-b47c-138f1e095220",
+      "tokenHash": "880fd0174822cc44a2820efc09299abdcbef914f3cecd35904ec43cae5e161bf",
+      "createdAt": "2026-04-16T03:32:14.875Z",
+      "expiresAt": "2026-04-23T03:32:14.875Z"
+    },
+    {
+      "id": "ses_dce4dc38-4b22-4307-94b7-b346149dfc01",
+      "tokenHash": "228e2be5d8d1ba96e073a5be846f2b6ca167b3d2d07dc6900e57e8506ffa7884",
+      "createdAt": "2026-04-16T03:57:03.124Z",
+      "expiresAt": "2026-04-23T03:57:03.124Z"
+    },
+    {
+      "id": "ses_0e34febe-daf4-4fa5-98ef-c0dc761868d0",
+      "tokenHash": "97afe5442cce6dcb1d654372707deae249d553486d120e65ac910fd2732f6917",
+      "createdAt": "2026-04-16T07:05:33.643Z",
+      "expiresAt": "2026-04-23T07:05:33.643Z"
+    }
+  ]
+}
